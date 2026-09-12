@@ -1,0 +1,137 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// Relationship progression levels
+enum RelationshipLevel {
+  STRANGER
+  ACQUAINTANCE
+  FRIEND
+  CLOSE_FRIEND
+  BEST_FRIEND
+}
+
+// Subscription tiers (Stripe integration coming soon)
+enum SubscriptionTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+// Message sender role
+enum MessageRole {
+  USER
+  ASSISTANT
+}
+
+/// Core user model - stores profile and astrology data
+model User {
+  id               String           @id @default(cuid())
+  email            String           @unique
+  name             String?
+  image            String?
+  /// User's birthdate for zodiac calculation
+  birthdate        DateTime?
+  /// Calculated zodiac sign (e.g., "aries", "scorpio")
+  zodiacSign       String?
+  /// JSON string of PersonalityTraits based on zodiac
+  personalitySeed  String?
+  subscriptionTier SubscriptionTier @default(FREE)
+  /// Tracks inactivity for proactive messaging cron
+  lastActiveAt     DateTime         @default(now())
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+
+  mate            AstroMate?
+  messages        Message[]
+  memorySnapshots MemorySnapshot[]
+  accounts        Account[]
+  sessions        Session[]
+}
+
+/// The AI companion - one per user, evolves over time
+model AstroMate {
+  id                String            @id @default(cuid())
+  userId            String            @unique
+  user              User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// AI gives itself a zodiac-appropriate name on first load
+  name              String            @default("Cosmo")
+  relationshipLevel RelationshipLevel @default(STRANGER)
+  /// Cumulative score that drives level-up logic
+  relationshipScore Float             @default(0)
+  totalInteractions Int               @default(0)
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+}
+
+/// Individual chat messages
+model Message {
+  id          String      @id @default(cuid())
+  userId      String
+  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  role        MessageRole
+  content     String
+  /// True if AI sent this message unprompted (cron job)
+  isProactive Boolean     @default(false)
+  createdAt   DateTime    @default(now())
+
+  @@index([userId, createdAt])
+}
+
+/// AI-generated summaries of past conversations for long-term memory
+model MemorySnapshot {
+  id                String   @id @default(cuid())
+  userId            String
+  user              User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// Ollama-generated summary of the conversation range
+  summary           String
+  /// Message index range this snapshot covers
+  messageRangeStart Int
+  messageRangeEnd   Int
+  createdAt         DateTime @default(now())
+
+  @@index([userId])
+}
+
+// ============================================
+// NextAuth.js required models
+// ============================================
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?
+  access_token      String?
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
