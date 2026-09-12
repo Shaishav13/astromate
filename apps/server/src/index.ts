@@ -1,15 +1,13 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
-import { prisma, isOllamaRunning } from './services/ollama';
 import { generalRateLimit } from './middleware/rateLimit';
 import onboardRouter from './routes/onboard';
 import chatRouter from './routes/chat';
 import mateRouter from './routes/mate';
 import { startProactiveCron } from './cron/proactive';
-
-// Re-import prisma from db package for health check
-import { prisma as db } from '@astromate/db';
+import { isOllamaRunning } from './services/ollama';
+import { prisma } from '@astromate/db';
 
 const app = express();
 const PORT = process.env.SERVER_PORT ?? 3001;
@@ -34,7 +32,7 @@ app.use(generalRateLimit);
 app.get('/api/health', async (_req, res) => {
   const [ollamaOk, dbOk] = await Promise.all([
     isOllamaRunning(),
-    db.$queryRaw`SELECT 1`.then(() => true).catch(() => false),
+    prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false),
   ]);
 
   const status = ollamaOk && dbOk ? 'ok' : 'degraded';
@@ -52,7 +50,7 @@ app.get('/api/health', async (_req, res) => {
 
 app.use('/api/onboard', onboardRouter);
 app.use('/api/chat', chatRouter);
-app.use('/api/messages', chatRouter); // GET /api/messages/:userId handled in chat router
+app.use('/api/messages', chatRouter);
 app.use('/api/mate', mateRouter);
 
 /** 404 handler */
@@ -61,31 +59,36 @@ app.use((_req, res) => {
 });
 
 /** Global error handler */
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error('[Server] Unhandled error:', err);
-  res.status(500).json({ error: 'Internal server error' });
-});
+app.use(
+  (
+    err: Error,
+    _req: express.Request,
+    res: express.Response,
+    _next: express.NextFunction
+  ) => {
+    console.error('[Server] Unhandled error:', err);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+);
 
 // ============================================
 // Start
 // ============================================
 app.listen(PORT, async () => {
   console.log(`
-✨ AstroMate Server running on http://localhost:${PORT}
-📊 Health check: http://localhost:${PORT}/api/health
+\u2728 AstroMate Server running on http://localhost:${PORT}
+\ud83d\udcca Health check: http://localhost:${PORT}/api/health
   `);
 
-  // Check Ollama on startup
   const ollamaOk = await isOllamaRunning();
   if (!ollamaOk) {
     console.warn(
-      '\n⚠️  Ollama is not running!\n   Start it with: ollama serve\n   Then pull a model: ollama pull llama3\n'
+      '\n\u26a0\ufe0f  Ollama is not running!\n   Start it with: ollama serve\n   Then pull a model: ollama pull llama3\n'
     );
   } else {
-    console.log(`🤖 Ollama connected (model: ${process.env.OLLAMA_MODEL ?? 'llama3'})`);
+    console.log(`\ud83e\udd16 Ollama connected (model: ${process.env.OLLAMA_MODEL ?? 'llama3'})`);
   }
 
-  // Start background cron jobs
   startProactiveCron();
 });
 
