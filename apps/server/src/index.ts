@@ -2,6 +2,7 @@ import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
 import { generalRateLimit } from './middleware/rateLimit';
+import authRouter from './routes/auth';
 import onboardRouter from './routes/onboard';
 import chatRouter from './routes/chat';
 import mateRouter from './routes/mate';
@@ -12,9 +13,6 @@ import { prisma } from '@astromate/db';
 const app = express();
 const PORT = process.env.SERVER_PORT ?? 3001;
 
-// ============================================
-// Middleware
-// ============================================
 app.use(
   cors({
     origin: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
@@ -24,71 +22,50 @@ app.use(
 app.use(express.json({ limit: '10kb' }));
 app.use(generalRateLimit);
 
-// ============================================
-// Routes
-// ============================================
-
-/** Health check - useful for deployment and debugging */
+// Health check
 app.get('/api/health', async (_req, res) => {
   const [ollamaOk, dbOk] = await Promise.all([
     isOllamaRunning(),
     prisma.$queryRaw`SELECT 1`.then(() => true).catch(() => false),
   ]);
-
   const status = ollamaOk && dbOk ? 'ok' : 'degraded';
-
   res.status(status === 'ok' ? 200 : 503).json({
     status,
     ollama: ollamaOk,
     db: dbOk,
     timestamp: new Date().toISOString(),
-    hint: !ollamaOk
-      ? 'Ollama not running. Start with: ollama serve'
-      : undefined,
+    hint: !ollamaOk ? 'Run: ollama serve' : undefined,
   });
 });
 
-app.use('/api/onboard', onboardRouter);
+// Routes
+app.use('/api/auth', authRouter);
+app.use('/api/onboard', onboardRouter); // kept for backward compat
 app.use('/api/chat', chatRouter);
 app.use('/api/messages', chatRouter);
 app.use('/api/mate', mateRouter);
 
-/** 404 handler */
+// 404
 app.use((_req, res) => {
   res.status(404).json({ error: 'Route not found' });
 });
 
-/** Global error handler */
+// Error handler
 app.use(
-  (
-    err: Error,
-    _req: express.Request,
-    res: express.Response,
-    _next: express.NextFunction
-  ) => {
+  (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('[Server] Unhandled error:', err);
     res.status(500).json({ error: 'Internal server error' });
   }
 );
 
-// ============================================
-// Start
-// ============================================
 app.listen(PORT, async () => {
-  console.log(`
-\u2728 AstroMate Server running on http://localhost:${PORT}
-\ud83d\udcca Health check: http://localhost:${PORT}/api/health
-  `);
-
+  console.log(`\n\u2728 AstroMate Server on http://localhost:${PORT}`);
   const ollamaOk = await isOllamaRunning();
   if (!ollamaOk) {
-    console.warn(
-      '\n\u26a0\ufe0f  Ollama is not running!\n   Start it with: ollama serve\n   Then pull a model: ollama pull llama3\n'
-    );
+    console.warn('\u26a0\ufe0f  Ollama not running. Start: ollama serve');
   } else {
-    console.log(`\ud83e\udd16 Ollama connected (model: ${process.env.OLLAMA_MODEL ?? 'llama3'})`);
+    console.log(`\ud83e\udd16 Ollama ready (${process.env.OLLAMA_MODEL ?? 'llama3'})`);
   }
-
   startProactiveCron();
 });
 
