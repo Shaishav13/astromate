@@ -4,7 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { AnimatePresence } from 'framer-motion';
 import { ChatMessage, MateProfile, RelationshipLevel } from '@astromate/shared';
-import { sendMessage, getMessages, getMateProfile } from '@/lib/api';
+import { sendMessage, getMessages, getMateProfile, logout } from '@/lib/api';
 import { WALLPAPERS } from '@/lib/zodiac';
 import ChatBubble from '@/components/ChatBubble';
 import TypingIndicator from '@/components/TypingIndicator';
@@ -16,6 +16,7 @@ export default function ChatPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [mate, setMate] = useState<MateProfile | null>(null);
+  const [mateExtra, setMateExtra] = useState<{ rashi?: string; nakshatra?: string }>({});
   const [input, setInput] = useState('');
   const [isTyping, setIsTyping] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
@@ -32,14 +33,13 @@ export default function ChatPage() {
       ? localStorage.getItem('astromate_user_id')
       : null;
 
-  // Redirect if not onboarded
+  // Auth guard
   useEffect(() => {
-    if (!userId) {
-      router.replace('/');
+    const token = localStorage.getItem('astromate_token');
+    if (!token || !userId) {
+      router.replace('/login');
       return;
     }
-
-    // Load saved wallpaper
     const saved = localStorage.getItem('astromate_wallpaper');
     if (saved) setWallpaperId(saved);
   }, [userId, router]);
@@ -47,7 +47,6 @@ export default function ChatPage() {
   // Initial data load
   useEffect(() => {
     if (!userId) return;
-
     const load = async () => {
       try {
         const [messagesRes, mateRes] = await Promise.all([
@@ -56,42 +55,42 @@ export default function ChatPage() {
         ]);
         setMessages(messagesRes.messages);
         setMate(mateRes.mate);
+        // Extract Vedic info from mate response
+        const raw = mateRes as any;
+        setMateExtra({
+          rashi: raw.mate?.rashi ?? raw.rashi,
+          nakshatra: raw.mate?.nakshatra ?? raw.nakshatra,
+        });
       } catch (err) {
-        setError(
-          err instanceof Error ? err.message : 'Failed to load chat data'
-        );
+        if (err instanceof Error && err.message.includes('401')) {
+          router.replace('/login');
+        } else {
+          setError(err instanceof Error ? err.message : 'Failed to load chat');
+        }
       } finally {
         setIsLoading(false);
       }
     };
-
     load();
-  }, [userId]);
+  }, [userId, router]);
 
-  // Poll for new messages every 5 seconds (catches proactive messages)
+  // Poll for proactive messages
   const pollMessages = useCallback(async () => {
     if (!userId) return;
     try {
       const res = await getMessages(userId);
-      setMessages((prev) => {
-        if (res.messages.length > prev.length) {
-          return res.messages;
-        }
-        return prev;
-      });
-    } catch {
-      // Silent fail for polling
-    }
+      setMessages((prev) =>
+        res.messages.length > prev.length ? res.messages : prev
+      );
+    } catch {}
   }, [userId]);
 
   useEffect(() => {
     pollRef.current = setInterval(pollMessages, 5000);
-    return () => {
-      if (pollRef.current) clearInterval(pollRef.current);
-    };
+    return () => { if (pollRef.current) clearInterval(pollRef.current); };
   }, [pollMessages]);
 
-  // Auto-scroll to bottom
+  // Auto-scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isTyping]);
@@ -104,50 +103,42 @@ export default function ChatPage() {
     setIsTyping(true);
     setError(null);
 
-    // Optimistically add user message
-    const tempUserMsg: ChatMessage = {
+    const tempMsg: ChatMessage = {
       id: `temp-${Date.now()}`,
       role: 'USER',
       content: text,
       isProactive: false,
       createdAt: new Date().toISOString(),
     };
-    setMessages((prev) => [...prev, tempUserMsg]);
+    setMessages((prev) => [...prev, tempMsg]);
 
     try {
       const res = await sendMessage(userId, text);
-
-      // Replace temp message and add AI response
       setMessages((prev) => [
-        ...prev.filter((m) => m.id !== tempUserMsg.id),
-        { ...tempUserMsg, id: `user-${Date.now()}` },
+        ...prev.filter((m) => m.id !== tempMsg.id),
+        { ...tempMsg, id: `user-${Date.now()}` },
         res.message,
       ]);
 
-      // Handle level-up
       if (res.relationshipUpdate.leveledUp) {
-        const newLevel = res.relationshipUpdate.newLevel;
         const labels: Record<RelationshipLevel, string> = {
-          STRANGER: 'Stranger',
-          ACQUAINTANCE: 'Acquaintance',
-          FRIEND: 'Friend',
-          CLOSE_FRIEND: 'Close Friend',
-          BEST_FRIEND: 'Best Friend',
+          STRANGER: 'Strangers',
+          ACQUAINTANCE: 'Acquaintances',
+          FRIEND: 'Friends',
+          CLOSE_FRIEND: 'Close Friends',
+          BEST_FRIEND: 'Best Friends',
         };
-        setLevelUpToast(`You're now ${labels[newLevel]}s! \u2b50`);
+        setLevelUpToast(`You're now ${labels[res.relationshipUpdate.newLevel]}! \u2b50`);
         setTimeout(() => setLevelUpToast(null), 4000);
-
-        // Refresh mate profile
-        getMateProfile(userId)
-          .then((r) => setMate(r.mate))
-          .catch(() => {});
+        getMateProfile(userId).then((r) => setMate(r.mate)).catch(() => {});
       }
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : 'Failed to send message'
-      );
-      // Remove optimistic message on error
-      setMessages((prev) => prev.filter((m) => m.id !== tempUserMsg.id));
+      if (err instanceof Error && err.message.includes('401')) {
+        router.replace('/login');
+      } else {
+        setError(err instanceof Error ? err.message : 'Failed to send');
+        setMessages((prev) => prev.filter((m) => m.id !== tempMsg.id));
+      }
     } finally {
       setIsTyping(false);
       inputRef.current?.focus();
@@ -159,6 +150,11 @@ export default function ChatPage() {
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace('/login');
   };
 
   const handleWallpaperSelect = (id: string) => {
@@ -181,31 +177,31 @@ export default function ChatPage() {
 
   return (
     <div className="flex flex-col h-screen max-w-lg mx-auto bg-white shadow-xl relative">
-      {/* Header */}
       {mate && (
         <MateHeader
           mate={mate}
+          rashi={mateExtra.rashi}
+          nakshatra={mateExtra.nakshatra}
           onWallpaperClick={() => setShowWallpaper(true)}
+          onLogout={handleLogout}
         />
       )}
 
-      {/* Level-up toast */}
       <AnimatePresence>
         {levelUpToast && (
-          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg">
+          <div className="absolute top-16 left-1/2 -translate-x-1/2 z-30 bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-medium px-4 py-2 rounded-full shadow-lg whitespace-nowrap">
             {levelUpToast}
           </div>
         )}
       </AnimatePresence>
 
-      {/* Chat area */}
       <div
         className={clsx(
           'flex-1 overflow-y-auto chat-scroll px-4 py-4 flex flex-col gap-0.5',
           currentWallpaper?.style ?? 'bg-chat-bg'
         )}
       >
-        {messages.length === 0 && !isLoading && (
+        {messages.length === 0 && (
           <div className="flex-1 flex items-center justify-center">
             <div className="text-center text-gray-400">
               <div className="text-4xl mb-2">\ud83d\udc4b</div>
@@ -215,11 +211,7 @@ export default function ChatPage() {
         )}
 
         {messages.map((msg) => (
-          <ChatBubble
-            key={msg.id}
-            message={msg}
-            isUser={msg.role === 'USER'}
-          />
+          <ChatBubble key={msg.id} message={msg} isUser={msg.role === 'USER'} />
         ))}
 
         <AnimatePresence>
@@ -229,17 +221,13 @@ export default function ChatPage() {
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Error banner */}
       {error && (
         <div className="px-4 py-2 bg-red-50 border-t border-red-100 text-red-600 text-xs">
           {error}
-          {error.includes('Ollama') && (
-            <span className="ml-1 font-medium">Run: ollama serve</span>
-          )}
+          {error.includes('Ollama') && <span className="ml-1 font-medium">Run: ollama serve</span>}
         </div>
       )}
 
-      {/* Input bar */}
       <div className="px-4 py-3 bg-white border-t border-gray-100 flex items-end gap-2">
         <textarea
           ref={inputRef}
@@ -249,32 +237,18 @@ export default function ChatPage() {
           placeholder={`Message ${mate?.name ?? 'AstroMate'}...`}
           rows={1}
           className="flex-1 resize-none px-4 py-2.5 rounded-2xl border border-gray-200 focus:outline-none focus:ring-2 focus:ring-primary-400 text-sm transition-all max-h-32 overflow-y-auto"
-          style={{ lineHeight: '1.5' }}
         />
         <button
           onClick={handleSend}
           disabled={!input.trim() || isTyping}
           className="w-10 h-10 flex-shrink-0 bg-gradient-to-br from-primary-600 to-accent-500 text-white rounded-full flex items-center justify-center hover:opacity-90 transition-all disabled:opacity-40 shadow-md"
-          aria-label="Send message"
         >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="w-4 h-4"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2.5}
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
-            />
+          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
           </svg>
         </button>
       </div>
 
-      {/* Wallpaper picker */}
       <WallpaperPicker
         isOpen={showWallpaper}
         currentWallpaper={wallpaperId}
