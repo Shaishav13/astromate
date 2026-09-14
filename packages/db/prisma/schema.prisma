@@ -7,38 +7,30 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum RelationshipLevel {
-  STRANGER
-  ACQUAINTANCE
-  FRIEND
-  CLOSE_FRIEND
-  BEST_FRIEND
-}
-
-enum SubscriptionTier {
-  FREE
-  PRO
-  PREMIUM
-}
-
-enum MessageRole {
-  USER
-  ASSISTANT
-}
+// SQLite does not support enums.
+// All enum-like fields use String with enforced values in application code.
+// Valid values:
+//   relationshipLevel: STRANGER | ACQUAINTANCE | FRIEND | CLOSE_FRIEND | BEST_FRIEND
+//   subscriptionTier:  FREE | PRO | PREMIUM
+//   role:              USER | ASSISTANT
 
 model User {
-  id               String           @id @default(cuid())
-  email            String           @unique
+  id               String  @id @default(cuid())
+  email            String  @unique
   name             String?
   password         String
-  country          String           @default("US")
+  /// ISO 3166-1 alpha-2 country code e.g. "IN", "US"
+  country          String  @default("US")
   birthdate        DateTime?
+  /// Western zodiac sign of the user e.g. "scorpio"
   zodiacSign       String?
+  /// JSON string of PersonalityTraits
   personalitySeed  String?
-  subscriptionTier SubscriptionTier @default(FREE)
-  lastActiveAt     DateTime         @default(now())
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime         @updatedAt
+  /// FREE | PRO | PREMIUM
+  subscriptionTier String  @default("FREE")
+  lastActiveAt     DateTime @default(now())
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
   mate            AstroMate?
   messages        Message[]
@@ -58,30 +50,37 @@ model AuthSession {
 }
 
 model AstroMate {
-  id                  String            @id @default(cuid())
-  userId              String            @unique
-  user                User              @relation(fields: [userId], references: [id], onDelete: Cascade)
-  name                String            @default("Cosmo")
-  buddyBirthTimestamp DateTime          @default(now())
+  id                  String   @id @default(cuid())
+  userId              String   @unique
+  user                User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  name                String   @default("Cosmo")
+  /// Exact signup timestamp = buddy's birth moment for Vedic astrology
+  buddyBirthTimestamp DateTime @default(now())
+  /// Vedic Rashi e.g. "Vrishchik"
   rashi               String?
+  /// Vedic Nakshatra e.g. "Jyeshtha"
   nakshatra           String?
+  /// Western zodiac of the buddy e.g. "scorpio"
   buddyZodiacSign     String?
+  /// JSON string of full buddy personality (Vedic + culture)
   buddyPersonality    String?
-  relationshipLevel   RelationshipLevel @default(STRANGER)
-  relationshipScore   Float             @default(0)
-  totalInteractions   Int               @default(0)
-  createdAt           DateTime          @default(now())
-  updatedAt           DateTime          @updatedAt
+  /// STRANGER | ACQUAINTANCE | FRIEND | CLOSE_FRIEND | BEST_FRIEND
+  relationshipLevel   String   @default("STRANGER")
+  relationshipScore   Float    @default(0)
+  totalInteractions   Int      @default(0)
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
 }
 
 model Message {
-  id          String      @id @default(cuid())
+  id          String   @id @default(cuid())
   userId      String
-  user        User        @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role        MessageRole
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// USER | ASSISTANT
+  role        String
   content     String
-  isProactive Boolean     @default(false)
-  createdAt   DateTime    @default(now())
+  isProactive Boolean  @default(false)
+  createdAt   DateTime @default(now())
 
   @@index([userId, createdAt])
 }
