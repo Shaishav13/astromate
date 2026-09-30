@@ -18,22 +18,35 @@ if %errorlevel% equ 0 (
     echo.
 )
 
-:: 2. Check if Server is already running on port 3001
-echo [2/3] Checking port 3001...
-powershell -Command "$c = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue; if ($c) { exit 0 } else { exit 1 }"
-if %errorlevel% equ 0 (
+:: 2. Check if Server and Ngrok are already running
+echo [2/3] Checking backend and tunnel status...
+powershell -Command "$srv = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue; $ng = Get-Process -Name 'ngrok' -ErrorAction SilentlyContinue; if ($srv -and $ng) { exit 2 } elseif ($srv) { exit 1 } else { exit 0 }"
+set STATUS=%errorlevel%
+
+if %STATUS% equ 2 (
+    echo.
+    echo ========================================================
+    echo  [ALL ACTIVE] AstroMate Server ^& Ngrok Tunnel are ALREADY running!
+    echo ========================================================
+    echo.
+    echo  Permanent Backend URL: https://baggy-tidbit-uplifted.ngrok-free.dev
+    echo  Live Vercel Frontend:  https://astromate-ruby.vercel.app
+    echo.
+    echo  Everything is already connected and operational.
+    echo  You can open the website on your phone or PC right now!
+    echo.
+    pause
+    exit /b 0
+)
+
+if %STATUS% equ 1 (
     echo       [OK] AstroMate Server is already running on port 3001!
     echo.
     echo [3/3] Launching Public HTTPS Tunnel...
     echo.
     echo --------------------------------------------------------
     echo PERMANENT URL FOR VERCEL DEPLOYMENT:
-    echo Your backend has a fixed permanent link:
     echo https://baggy-tidbit-uplifted.ngrok-free.dev
-    echo.
-    echo In Vercel -^> Project Settings -^> Environment Variables:
-    echo   Key:   NEXT_PUBLIC_SERVER_URL
-    echo   Value: https://baggy-tidbit-uplifted.ngrok-free.dev
     echo --------------------------------------------------------
     echo.
     npm run tunnel
@@ -44,12 +57,7 @@ if %errorlevel% equ 0 (
     echo.
     echo --------------------------------------------------------
     echo PERMANENT URL FOR VERCEL DEPLOYMENT:
-    echo Your backend has a fixed permanent link:
     echo https://baggy-tidbit-uplifted.ngrok-free.dev
-    echo.
-    echo In Vercel -^> Project Settings -^> Environment Variables:
-    echo   Key:   NEXT_PUBLIC_SERVER_URL
-    echo   Value: https://baggy-tidbit-uplifted.ngrok-free.dev
     echo --------------------------------------------------------
     echo.
     npm run server:tunnel
