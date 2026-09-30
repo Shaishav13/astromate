@@ -79,14 +79,14 @@ cd astromate
 npm install
 ```
 
-### 2. Set Up Ollama
+### 2. Set Up Ollama (Lightweight & Fast)
 
 ```bash
-# Install Ollama from https://ollama.ai, then:
-ollama pull llama3
+# Recommended: Llama 3.2 1B (Ultra-fast, uses only ~1.2GB RAM)
+ollama pull llama3.2:1b
 
-# Or use a smaller/faster model:
-ollama pull qwen2:1.5b
+# Alternative: Qwen 2.5 1.5B (Great for witty banter & multilingual slang, ~1.3GB RAM)
+ollama pull qwen2.5:1.5b
 ```
 
 ### 3. Configure Environment

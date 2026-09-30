@@ -1,4 +1,6 @@
 import fetch from 'node-fetch';
+import fs from 'fs';
+import path from 'path';
 import { ChatMessage } from '@astromate/shared';
 
 // Read at call time (not module load time) to ensure dotenv has loaded
@@ -6,7 +8,20 @@ function getBaseUrl() {
   return process.env.OLLAMA_BASE_URL ?? 'http://localhost:11434';
 }
 function getModel() {
-  const model = process.env.OLLAMA_MODEL ?? 'llama3';
+  try {
+    const envPaths = [
+      path.resolve(process.cwd(), '.env'),
+      path.resolve(__dirname, '../../.env'),
+    ];
+    for (const p of envPaths) {
+      if (fs.existsSync(p)) {
+        const content = fs.readFileSync(p, 'utf8');
+        const match = content.match(/OLLAMA_MODEL=["']?([^"'\r\n]+)/);
+        if (match) return match[1].trim();
+      }
+    }
+  } catch {}
+  const model = process.env.OLLAMA_MODEL ?? 'qwen2.5:1.5b';
   return model.replace(/^"|"$/g, ''); // strip any surrounding quotes
 }
 
@@ -64,9 +79,9 @@ export async function generateResponse(
         messages,
         stream: false,
         options: {
-          temperature: 0.85,
+          temperature: 0.55,
           top_p: 0.9,
-          num_predict: 150,
+          num_predict: 80,
         },
       }),
     });

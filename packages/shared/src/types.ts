@@ -68,6 +68,14 @@ export interface MateProfile {
   totalInteractions: number;
   zodiacSign: ZodiacSign;
   personality: PersonalityTraits;
+  buddyBirthTimestamp?: string;
+  rashi?: string;
+  nakshatra?: string;
+  userZodiacSign?: string;
+  userBirthdate?: string;
+  userName?: string;
+  userEmail?: string;
+  country?: string;
 }
 
 /** A single chat message */
@@ -87,6 +95,57 @@ export interface UserProfile {
   zodiacSign: ZodiacSign | null;
   subscriptionTier: SubscriptionTier;
   lastActiveAt: string;
+}
+
+// ============================================
+// Open Knowledge Format (OKF) Types
+// ============================================
+
+export type OkfMemoryType =
+  | 'preference'
+  | 'milestone'
+  | 'inside_joke'
+  | 'celestial_observation'
+  | 'personal_fact';
+
+export type OkfMemoryCategory =
+  | 'lifestyle'
+  | 'personal'
+  | 'work_study'
+  | 'humor'
+  | 'astrology';
+
+export interface OkfMemoryItem {
+  id: string;
+  userId: string;
+  type: OkfMemoryType;
+  category: OkfMemoryCategory;
+  title: string;
+  tags: string[];
+  confidence: number;
+  content: string;
+  sourceRange?: string | null;
+  createdAt: string;
+  updatedAt: string;
+  rawOkf?: string;
+}
+
+export interface OkfBundleResponse {
+  memories: OkfMemoryItem[];
+  stats: {
+    total: number;
+    byType: Record<string, number>;
+    byCategory: Record<string, number>;
+  };
+}
+
+export interface CreateOkfMemoryRequest {
+  type: OkfMemoryType;
+  category: OkfMemoryCategory;
+  title: string;
+  tags: string[];
+  content: string;
+  confidence?: number;
 }
 
 // ============================================

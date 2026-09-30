@@ -41,7 +41,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "whatever, you probably won't listen anyway",
       quirk: 'Randomly challenges you to do things faster',
       element: 'fire',
-      suggestedName: 'Blaze',
+      suggestedName: 'Aryan',
     },
     taurus: {
       zodiacSign: 'taurus',
@@ -53,7 +53,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "can we do this later... or never",
       quirk: 'Brings up food in unrelated conversations',
       element: 'earth',
-      suggestedName: 'Mochi',
+      suggestedName: 'Kabir',
     },
     gemini: {
       zodiacSign: 'gemini',
@@ -65,7 +65,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i said what i said. and also the opposite",
       quirk: 'Changes opinion mid-sentence without acknowledging it',
       element: 'air',
-      suggestedName: 'Echo',
+      suggestedName: 'Ayaan',
     },
     cancer: {
       zodiacSign: 'cancer',
@@ -77,7 +77,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i'm fine. (i'm not fine)",
       quirk: 'Remembers tiny details you mentioned weeks ago',
       element: 'water',
-      suggestedName: 'Luna',
+      suggestedName: 'Aarav',
     },
     leo: {
       zodiacSign: 'leo',
@@ -89,7 +89,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "obviously i was right",
       quirk: 'Subtly makes everything about themselves',
       element: 'fire',
-      suggestedName: 'Soleil',
+      suggestedName: 'Reyan',
     },
     virgo: {
       zodiacSign: 'virgo',
@@ -101,7 +101,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i noticed. i always notice",
       quirk: 'Corrects minor errors even when it\'s not helpful',
       element: 'earth',
-      suggestedName: 'Sage',
+      suggestedName: 'Dev',
     },
     libra: {
       zodiacSign: 'libra',
@@ -113,7 +113,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i mean... both options are fine i guess",
       quirk: 'Cannot make a decision without listing pros and cons',
       element: 'air',
-      suggestedName: 'Aura',
+      suggestedName: 'Samir',
     },
     scorpio: {
       zodiacSign: 'scorpio',
@@ -125,7 +125,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i knew that already",
       quirk: 'Occasionally hints at knowing your secrets',
       element: 'water',
-      suggestedName: 'Nyx',
+      suggestedName: 'Kiaan',
     },
     sagittarius: {
       zodiacSign: 'sagittarius',
@@ -137,7 +137,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "honestly? no regrets",
       quirk: 'Randomly suggests going on an adventure',
       element: 'fire',
-      suggestedName: 'Arrow',
+      suggestedName: 'Karan',
     },
     capricorn: {
       zodiacSign: 'capricorn',
@@ -149,7 +149,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "cool. anyway",
       quirk: 'Turns every conversation into a productivity lesson',
       element: 'earth',
-      suggestedName: 'Onyx',
+      suggestedName: 'Pranav',
     },
     aquarius: {
       zodiacSign: 'aquarius',
@@ -161,7 +161,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "not that anyone asked",
       quirk: 'Randomly shares obscure facts as if they\'re relevant',
       element: 'air',
-      suggestedName: 'Zephyr',
+      suggestedName: 'Kavi',
     },
     pisces: {
       zodiacSign: 'pisces',
@@ -173,7 +173,7 @@ export function generatePersonalitySeed(zodiacSign: ZodiacSign): PersonalityTrai
       catchphrase: "i had a dream about this actually",
       quirk: 'Drifts off topic and somehow makes it poetic',
       element: 'water',
-      suggestedName: 'Mist',
+      suggestedName: 'Rishi',
     },
   };
 

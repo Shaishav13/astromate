@@ -1,6 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  transpilePackages: ['@astromate/shared'],
   // Allow cross-origin requests to the local Express server
   async rewrites() {
     return [

@@ -2,13 +2,17 @@ import type { Metadata } from 'next';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'AstroMate - Your AI Best Friend',
+  metadataBase: new URL(
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : 'http://localhost:3000')
+  ),
+  title: 'AstroMate ✧ Celestial AI Best Friend',
   description:
-    'A personalized AI companion that grows with you, rooted in astrology and powered by memory.',
-  keywords: ['AI companion', 'astrology', 'chat', 'friendship', 'AI buddy'],
+    'A living AI companion born at your exact cosmic coordinates. Rooted in Vedic astrology, evolving through relationship stages, and powered by deep memory.',
+  keywords: ['AI companion', 'Vedic astrology', 'zodiac', 'cosmic friendship', 'natal chart', 'Nakshatra'],
   openGraph: {
-    title: 'AstroMate',
-    description: 'Your AI best friend, powered by the stars.',
+    title: 'AstroMate ✧ Celestial AI Best Friend',
+    description: 'Your personalized AI companion born at your exact stellar moment.',
     type: 'website',
   },
 };
@@ -19,8 +23,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
-      <body className="min-h-screen bg-chat-bg antialiased">{children}</body>
+    <html lang="en" className="dark">
+      <body className="min-h-screen bg-cosmic-950 text-slate-100 antialiased overflow-x-hidden">{children}</body>
     </html>
   );
 }

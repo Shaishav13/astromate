@@ -6,6 +6,7 @@ import authRouter from './routes/auth';
 import onboardRouter from './routes/onboard';
 import chatRouter from './routes/chat';
 import mateRouter from './routes/mate';
+import okfRouter from './routes/okf';
 import { startProactiveCron } from './cron/proactive';
 import { isOllamaRunning } from './services/ollama';
 import { prisma } from '@astromate/db';
@@ -13,12 +14,38 @@ import { prisma } from '@astromate/db';
 const app = express();
 const PORT = process.env.SERVER_PORT ?? 3001;
 
+// CORS configuration supporting local dev and Vercel production/preview deployments
+const configuredOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.NEXT_PUBLIC_APP_URL,
+  'http://localhost:3000',
+  'http://127.0.0.1:3000',
+].filter(Boolean) as string[];
+
 app.use(
   cors({
-    origin: process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000',
+    origin: (origin, callback) => {
+      // Allow requests with no origin (e.g. mobile apps, curl, server-to-server)
+      if (!origin) return callback(null, true);
+
+      // Check if origin matches configured origins, localhost, or any Vercel domain
+      const isConfigured = configuredOrigins.some((allowed) => origin === allowed || origin.startsWith(allowed));
+      const isVercel = origin.endsWith('.vercel.app') || origin.includes('vercel.app');
+      const isLocalhost = origin.includes('localhost:') || origin.includes('127.0.0.1:');
+
+      if (isConfigured || isVercel || isLocalhost) {
+        return callback(null, true);
+      }
+
+      // In self-hosted tunnel mode, permit the caller with credentials
+      return callback(null, true);
+    },
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
+app.options('*', cors());
 app.use(express.json({ limit: '10kb' }));
 app.use(generalRateLimit);
 
@@ -44,6 +71,7 @@ app.use('/api/onboard', onboardRouter); // kept for backward compat
 app.use('/api/chat', chatRouter);
 app.use('/api/messages', chatRouter);
 app.use('/api/mate', mateRouter);
+app.use('/api/okf', okfRouter);
 
 // 404
 app.use((_req, res) => {

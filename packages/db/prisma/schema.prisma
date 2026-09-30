@@ -36,6 +36,7 @@ model User {
   messages        Message[]
   memorySnapshots MemorySnapshot[]
   sessions        AuthSession[]
+  okfMemories     OkfMemory[]
 }
 
 model AuthSession {
@@ -96,3 +97,26 @@ model MemorySnapshot {
 
   @@index([userId])
 }
+
+model OkfMemory {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  /// preference | milestone | inside_joke | celestial_observation | personal_fact
+  type        String   @default("personal_fact")
+  /// lifestyle | personal | work_study | humor | astrology
+  category    String   @default("lifestyle")
+  title       String
+  /// JSON string array of tags e.g. ["food", "spicy", "ramen"]
+  tags        String   @default("[]")
+  confidence  Float    @default(0.9)
+  /// Markdown content of the OKF memory
+  content     String
+  sourceRange String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId, type])
+  @@index([userId, category])
+}
+

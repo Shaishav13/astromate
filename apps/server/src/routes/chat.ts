@@ -9,6 +9,7 @@ import {
   buildSystemPrompt,
 } from '../services/relationship';
 import { generateResponse, generateMemorySummary } from '../services/ollama';
+import { getActiveOkfPromptContext, extractOkfMemoriesFromConversation } from '../services/okf';
 import { chatRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
@@ -64,16 +65,18 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
       take: 3,
     });
 
-    // Build dynamic system prompt
-    const personality = user.personalitySeed
-      ? JSON.parse(user.personalitySeed)
-      : generatePersonalitySeed(user.zodiacSign as any ?? 'aries');
-
-    const systemPrompt = buildSystemPrompt(mate, user, personality, memories);
+    // Build dynamic system prompt with OKF Memory Context
+    const personality = user.personalitySeed ? JSON.parse(user.personalitySeed) : null;
+    const okfContext = await getActiveOkfPromptContext(userId);
+    const systemPrompt = buildSystemPrompt(mate, user, personality, memories, okfContext);
 
     // Generate AI response
     console.log(`[Chat] Generating response for ${user.name} (${mate.relationshipLevel})`);
-    const aiResponseText = await generateResponse(systemPrompt, conversationHistory);
+    const rawAiResponse = await generateResponse(systemPrompt, conversationHistory);
+    const aiResponseText = rawAiResponse
+      .replace(new RegExp(`^(?:${mate.name}|Assistant|AI):\\s*`, 'i'), '')
+      .replace(/^["']|["']$/g, '')
+      .trim();
 
     // Save AI response
     const aiMessage = await prisma.message.create({
@@ -131,6 +134,17 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
         )
         .then(() => console.log(`[Memory] Snapshot created for ${user.name}`))
         .catch((err) => console.error('[Memory] Snapshot failed:', err));
+
+      // Extract structured OKF memories in background
+      extractOkfMemoriesFromConversation(
+        userId,
+        messagesToSummarize.reverse().map((m) => ({
+          role: m.role as 'USER' | 'ASSISTANT',
+          content: m.content,
+        })),
+        user.name ?? 'Friend',
+        mate.name
+      ).catch((err) => console.error('[OKF] Extraction failed:', err));
     }
 
     const response: ChatResponse = {
@@ -199,6 +213,21 @@ router.get('/:userId', async (req: Request, res: Response) => {
   } catch (error) {
     console.error('[Messages] Error:', error);
     return res.status(500).json({ error: 'Failed to fetch messages' });
+  }
+});
+
+/**
+ * DELETE /api/messages/:userId
+ * Clears message history for a user to start fresh.
+ */
+router.delete('/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    await prisma.message.deleteMany({ where: { userId } });
+    return res.status(200).json({ success: true, message: 'Chat history cleared' });
+  } catch (error) {
+    console.error('[Messages] Clear Error:', error);
+    return res.status(500).json({ error: 'Failed to clear messages' });
   }
 });
 

@@ -16,18 +16,18 @@ export default function RelationshipBadge({
   showScore = false,
 }: RelationshipBadgeProps) {
   return (
-    <div className="flex items-center gap-1.5">
+    <div className="inline-flex items-center gap-1.5">
       <span
         className={clsx(
-          'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium',
+          'inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium backdrop-blur-md transition-all',
           getRelationshipColor(level)
         )}
       >
-        <span>{getRelationshipEmoji(level)}</span>
-        <span>{getRelationshipLabel(level)}</span>
+        <span className="text-xs">{getRelationshipEmoji(level)}</span>
+        <span className="tracking-wide">{getRelationshipLabel(level)}</span>
       </span>
       {showScore && score !== undefined && (
-        <span className="text-xs text-gray-400">{Math.round(score)} pts</span>
+        <span className="text-[11px] text-slate-400 font-mono">{Math.round(score)} pts</span>
       )}
     </div>
   );

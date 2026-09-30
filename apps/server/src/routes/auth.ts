@@ -105,6 +105,7 @@ router.post('/signup', async (req: Request, res: Response) => {
       mate: {
         id: mate.id,
         name: mate.name,
+        buddyBirthTimestamp: mate.buddyBirthTimestamp.toISOString(),
         rashi: mate.rashi,
         nakshatra: mate.nakshatra,
         buddyZodiacSign: mate.buddyZodiacSign,
@@ -164,6 +165,7 @@ router.post('/login', async (req: Request, res: Response) => {
         ? {
             id: user.mate.id,
             name: user.mate.name,
+            buddyBirthTimestamp: user.mate.buddyBirthTimestamp.toISOString(),
             rashi: user.mate.rashi,
             nakshatra: user.mate.nakshatra,
             buddyZodiacSign: user.mate.buddyZodiacSign,
@@ -192,6 +194,49 @@ router.post('/logout', async (req: Request, res: Response) => {
     return res.status(200).json({ message: 'Logged out successfully' });
   } catch (error) {
     return res.status(500).json({ error: 'Logout failed' });
+  }
+});
+
+/**
+ * PATCH /api/auth/profile/:userId
+ * Updates the user's profile information (name, country).
+ */
+router.patch('/profile/:userId', async (req: Request, res: Response) => {
+  try {
+    const { userId } = req.params;
+    const { name, country } = req.body;
+
+    const data: any = {};
+    if (typeof name === 'string' && name.trim()) {
+      data.name = name.trim();
+    }
+    if (typeof country === 'string' && country.trim()) {
+      data.country = country.trim().toUpperCase();
+    }
+
+    const updated = await prisma.user.update({
+      where: { id: userId },
+      data,
+    });
+
+    console.log(`[Auth] User profile updated for ${updated.name} (${updated.id})`);
+
+    return res.status(200).json({
+      success: true,
+      user: {
+        id: updated.id,
+        name: updated.name,
+        email: updated.email,
+        country: updated.country,
+        zodiacSign: updated.zodiacSign,
+        birthdate: updated.birthdate?.toISOString(),
+        subscriptionTier: updated.subscriptionTier,
+        createdAt: updated.createdAt.toISOString(),
+      },
+    });
+  } catch (error) {
+    console.error('[Auth] Profile update error:', error);
+    return res.status(500).json({ error: 'Failed to update user profile' });
   }
 });
 

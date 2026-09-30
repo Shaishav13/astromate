@@ -3,6 +3,9 @@ import {
   MessagesResponse,
   MateResponse,
   HealthResponse,
+  OkfBundleResponse,
+  OkfMemoryItem,
+  CreateOkfMemoryRequest,
 } from '@astromate/shared';
 
 const SERVER_URL =
@@ -106,12 +109,89 @@ export async function getMessages(
   return apiFetch<MessagesResponse>(`/api/messages/${userId}?page=${page}`);
 }
 
+/** Clear all messages for a user */
+export async function clearMessages(userId: string): Promise<void> {
+  return apiFetch<void>(`/api/messages/${userId}`, { method: 'DELETE' });
+}
+
 /** Get the AstroMate profile */
 export async function getMateProfile(userId: string): Promise<MateResponse> {
   return apiFetch<MateResponse>(`/api/mate/${userId}`);
+}
+
+/** Update the AstroMate name */
+export async function updateMateName(
+  userId: string,
+  name: string
+): Promise<{ success: boolean; mate: { id: string; name: string } }> {
+  return apiFetch<{ success: boolean; mate: { id: string; name: string } }>(
+    `/api/mate/${userId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify({ name }),
+    }
+  );
 }
 
 /** Check server health */
 export async function checkHealth(): Promise<HealthResponse> {
   return apiFetch<HealthResponse>('/api/health');
 }
+
+/** Get all OKF memories for a user */
+export async function getOkfMemories(userId: string): Promise<OkfBundleResponse> {
+  return apiFetch<OkfBundleResponse>(`/api/okf/${userId}`);
+}
+
+/** Create a new OKF memory manually */
+export async function createOkfMemory(
+  userId: string,
+  data: CreateOkfMemoryRequest
+): Promise<{ success: boolean; memory: OkfMemoryItem }> {
+  return apiFetch<{ success: boolean; memory: OkfMemoryItem }>(`/api/okf/${userId}`, {
+    method: 'POST',
+    body: JSON.stringify(data),
+  });
+}
+
+/** Update an existing OKF memory */
+export async function updateOkfMemory(
+  userId: string,
+  memoryId: string,
+  data: Partial<CreateOkfMemoryRequest>
+): Promise<{ success: boolean; memory: OkfMemoryItem }> {
+  return apiFetch<{ success: boolean; memory: OkfMemoryItem }>(
+    `/api/okf/${userId}/${memoryId}`,
+    {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }
+  );
+}
+
+/** Delete an OKF memory */
+export async function deleteOkfMemory(
+  userId: string,
+  memoryId: string
+): Promise<{ success: boolean }> {
+  return apiFetch<{ success: boolean }>(`/api/okf/${userId}/${memoryId}`, {
+    method: 'DELETE',
+  });
+}
+
+/** Get download URL for raw OKF markdown bundle */
+export function getOkfExportUrl(userId: string): string {
+  return `${SERVER_URL}/api/okf/${userId}/export`;
+}
+
+/** Updates user profile fields */
+export async function updateUserProfile(
+  userId: string,
+  data: { name?: string; country?: string }
+): Promise<{ success: boolean; user: any }> {
+  return apiFetch<{ success: boolean; user: any }>(`/api/auth/profile/${userId}`, {
+    method: 'PATCH',
+    body: JSON.stringify(data),
+  });
+}
+

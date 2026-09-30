@@ -2,6 +2,7 @@ import { Router, Request, Response } from 'express';
 import { prisma } from '@astromate/db';
 import { OnboardRequest, OnboardResponse } from '@astromate/shared';
 import { getZodiacSign, generatePersonalitySeed } from '../services/astrology';
+import { generateVedicProfile } from '../services/vedic';
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.post('/', async (req: Request, res: Response) => {
       return res.status(400).json({ error: 'Invalid birthdate format. Use ISO string.' });
     }
 
-    // Calculate astrology data
+    // Calculate astrology data for user
     const zodiacSign = getZodiacSign(birthdateObj);
     const personality = generatePersonalitySeed(zodiacSign);
 
@@ -37,6 +38,7 @@ router.post('/', async (req: Request, res: Response) => {
         data: {
           email,
           name,
+          password: '',
           birthdate: birthdateObj,
           zodiacSign,
           personalitySeed: JSON.stringify(personality),
@@ -53,17 +55,23 @@ router.post('/', async (req: Request, res: Response) => {
       console.log(`[Onboard] Returning user: ${name}`);
     }
 
-    // Find or create AstroMate
+    // Find or create AstroMate (born right now at current date/time)
     let mate = await prisma.astroMate.findUnique({ where: { userId: user.id } });
 
     if (!mate) {
+      const buddyBirthTimestamp = new Date();
+      const vedic = generateVedicProfile(buddyBirthTimestamp);
       mate = await prisma.astroMate.create({
         data: {
           userId: user.id,
-          name: personality.suggestedName,
+          name: vedic.buddyName,
+          buddyBirthTimestamp,
+          rashi: vedic.rashi,
+          nakshatra: vedic.nakshatra,
+          buddyZodiacSign: vedic.westernSign,
         },
       });
-      console.log(`[Onboard] AstroMate created: ${personality.suggestedName} for ${name}`);
+      console.log(`[Onboard] AstroMate created: ${vedic.buddyName} for ${name} at ${buddyBirthTimestamp.toISOString()}`);
     }
 
     const response: OnboardResponse = {
@@ -81,8 +89,13 @@ router.post('/', async (req: Request, res: Response) => {
         relationshipLevel: mate.relationshipLevel as any,
         relationshipScore: mate.relationshipScore,
         totalInteractions: mate.totalInteractions,
-        zodiacSign: zodiacSign,
+        zodiacSign: (mate.buddyZodiacSign as any) ?? 'aries',
         personality,
+        buddyBirthTimestamp: mate.buddyBirthTimestamp.toISOString(),
+        rashi: mate.rashi ?? undefined,
+        nakshatra: mate.nakshatra ?? undefined,
+        userZodiacSign: user.zodiacSign ?? undefined,
+        userBirthdate: user.birthdate?.toISOString() ?? undefined,
       },
       isNewUser,
     };
