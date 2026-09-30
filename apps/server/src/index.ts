@@ -82,7 +82,7 @@ app.use((_req, res) => {
 app.use(
   (err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
     console.error('[Server] Unhandled error:', err);
-    res.status(500).json({ error: 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error', details: err.message, stack: err.stack });
   }
 );
 
