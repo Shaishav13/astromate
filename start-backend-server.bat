@@ -18,22 +18,40 @@ if %errorlevel% equ 0 (
     echo.
 )
 
-:: 2. Start Backend & Tunnel
-echo.
-echo [2/3] Starting AstroMate Express Server (port 3001)...
-echo [3/3] Launching Secure HTTPS Tunnel (Cloudflare)...
-echo.
-echo --------------------------------------------------------
-echo NOTE FOR VERCEL DEPLOYMENT:
-echo Look for the public HTTPS URL displayed below by the tunnel.
-echo (It will look like: https://xxxx.trycloudflare.com)
-echo.
-echo Copy that HTTPS URL and set it in your Vercel Dashboard:
-echo Project Settings -^> Environment Variables:
-echo Key:   NEXT_PUBLIC_SERVER_URL
-echo Value: https://xxxx.trycloudflare.com
-echo --------------------------------------------------------
-echo.
+:: 2. Check if Server is already running on port 3001
+echo [2/3] Checking port 3001...
+powershell -Command "$c = Get-NetTCPConnection -LocalPort 3001 -State Listen -ErrorAction SilentlyContinue; if ($c) { exit 0 } else { exit 1 }"
+if %errorlevel% equ 0 (
+    echo       [OK] AstroMate Server is already running on port 3001!
+    echo.
+    echo [3/3] Launching Public HTTPS Tunnel...
+    echo.
+    echo --------------------------------------------------------
+    echo NOTE FOR VERCEL DEPLOYMENT:
+    echo Look for the public HTTPS URL displayed below by the tunnel.
+    echo (For example: https://xxxx.loca.lt)
+    echo.
+    echo Copy that URL and paste it in Vercel -^> Project Settings -^> Environment Variables:
+    echo   Key:   NEXT_PUBLIC_SERVER_URL
+    echo   Value: https://xxxx.loca.lt
+    echo --------------------------------------------------------
+    echo.
+    npm run tunnel
+) else (
+    echo       Starting AstroMate Server on port 3001...
+    echo.
+    echo [3/3] Launching Server + Public HTTPS Tunnel...
+    echo.
+    echo --------------------------------------------------------
+    echo NOTE FOR VERCEL DEPLOYMENT:
+    echo Look for the public HTTPS URL displayed below by the tunnel.
+    echo.
+    echo Copy that URL and paste it in Vercel -^> Project Settings -^> Environment Variables:
+    echo   Key:   NEXT_PUBLIC_SERVER_URL
+    echo   Value: https://xxxx.loca.lt
+    echo --------------------------------------------------------
+    echo.
+    npm run server:tunnel
+)
 
-npm run server:tunnel
 pause

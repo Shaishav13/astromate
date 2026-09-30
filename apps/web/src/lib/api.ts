@@ -46,6 +46,7 @@ async function apiFetch<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${SERVER_URL}${path}`, {
     headers: {
       'Content-Type': 'application/json',
+      'Bypass-Tunnel-Reminder': 'true',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     ...options,
