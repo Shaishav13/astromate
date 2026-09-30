@@ -29,11 +29,11 @@ if %errorlevel% equ 0 (
     echo --------------------------------------------------------
     echo PERMANENT URL FOR VERCEL DEPLOYMENT:
     echo Your backend has a fixed permanent link:
-    echo https://astromate-shaishav-api.loca.lt
+    echo https://baggy-tidbit-uplifted.ngrok-free.dev
     echo.
     echo In Vercel -^> Project Settings -^> Environment Variables:
     echo   Key:   NEXT_PUBLIC_SERVER_URL
-    echo   Value: https://astromate-shaishav-api.loca.lt
+    echo   Value: https://baggy-tidbit-uplifted.ngrok-free.dev
     echo --------------------------------------------------------
     echo.
     npm run tunnel
@@ -45,11 +45,11 @@ if %errorlevel% equ 0 (
     echo --------------------------------------------------------
     echo PERMANENT URL FOR VERCEL DEPLOYMENT:
     echo Your backend has a fixed permanent link:
-    echo https://astromate-shaishav-api.loca.lt
+    echo https://baggy-tidbit-uplifted.ngrok-free.dev
     echo.
     echo In Vercel -^> Project Settings -^> Environment Variables:
     echo   Key:   NEXT_PUBLIC_SERVER_URL
-    echo   Value: https://astromate-shaishav-api.loca.lt
+    echo   Value: https://baggy-tidbit-uplifted.ngrok-free.dev
     echo --------------------------------------------------------
     echo.
     npm run server:tunnel

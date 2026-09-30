@@ -42,7 +42,14 @@ app.use(
     },
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With', 'Bypass-Tunnel-Reminder', 'bypass-tunnel-reminder'],
+    allowedHeaders: [
+      'Content-Type',
+      'Authorization',
+      'X-Requested-With',
+      'Bypass-Tunnel-Reminder',
+      'bypass-tunnel-reminder',
+      'ngrok-skip-browser-warning',
+    ],
   })
 );
 app.options('*', cors());
