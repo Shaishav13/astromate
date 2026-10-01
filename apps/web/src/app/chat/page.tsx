@@ -16,8 +16,9 @@ import RelationshipBadge from '@/components/RelationshipBadge';
 import clsx from 'clsx';
 
 const CONVERSATION_PROMPTS = [
+  'Kya chal raha hai yaar?',
   'Give me a quick vibe check today',
-  "What does today's energy feel like?",
+  'Bhai mood thoda off hai aaj',
   'Roast my sign with love',
   'What do you remember about me?',
   'Tell me your secret quirk',

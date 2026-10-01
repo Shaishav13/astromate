@@ -5,7 +5,7 @@ import {
 } from '@astromate/shared';
 import { AstroMate, User } from '@astromate/db';
 import { MemorySnapshot } from '@astromate/db';
-import { getCultureProfile } from './culture';
+import { getCultureProfile, isHinglishOrHindi } from './culture';
 
 /**
  * Determines the relationship level based on the cumulative score.
@@ -51,13 +51,19 @@ export function buildSystemPrompt(
   user: User,
   personality: any,
   memories: MemorySnapshot[],
-  okfContext = ''
+  okfContext = '',
+  currentMessage = ''
 ): string {
   const userName = user.name ?? 'Friend';
   const mateName = mate.name;
   const level = mate.relationshipLevel as RelationshipLevel;
-  const country = user.country ?? 'US';
-  const cultureProfile = getCultureProfile(country);
+
+  // Country & Hinglish dynamic resolution:
+  // Default to 'IN' for Indian context. If message has Hinglish words, activate IN / Hinglish profile
+  const userCountry = user.country ?? 'IN';
+  const detectedHinglish = isHinglishOrHindi(currentMessage);
+  const activeCountry = detectedHinglish ? 'IN' : userCountry;
+  const cultureProfile = getCultureProfile(activeCountry);
 
   // Parse buddy personality (Vedic + culture)
   const buddyPersonality = mate.buddyPersonality

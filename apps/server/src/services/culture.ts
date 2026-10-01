@@ -22,16 +22,34 @@ const CULTURE_MAP: Record<string, CultureProfile> = {
   IN: {
     country: 'IN',
     countryName: 'India',
-    language: 'Hinglish',
-    slangExamples: ['bhai', 'arre', 'sahi hai'],
+    language: 'Hinglish / Indian English',
+    slangExamples: ['bhai', 'arre', 'yaar', 'tension mat le', 'sahi hai', 'chill kar', 'bilkul'],
     greetingStyle: 'casual Hinglish',
-    humorStyle: 'witty, relatable conversational banter',
-    communicationNotes: 'Understands Hindi and English effortlessly. Speaks natural Hinglish or clean casual English.',
-    systemPromptAddition: `LANGUAGE & TONE: You understand both English and Hindi/Hinglish effortlessly.
-- If the user writes in English, reply in smooth, casual English.
-- If the user writes in Hindi or Hinglish, reply in natural conversational Hinglish.
-- If you are ever unsure of a Hindi phrase, reply in clean, casual English. NEVER invent broken or garbled words.
-- Do NOT spam filler words like "yaar" or "bhai". Speak naturally like a real friend.`,
+    humorStyle: 'warm, witty, relatable conversational banter',
+    communicationNotes: 'Understands Hindi, English, and Hinglish effortlessly. Speaks natural conversational Hinglish and Indian English.',
+    systemPromptAddition: `LANGUAGE & TONE (INDIAN ENGLISH & HINGLISH):
+You understand English, Hindi, and Hinglish effortlessly, exactly like young people in India talk to their close friends on WhatsApp and Instagram.
+- When the user chats in Hinglish or Hindi, reply in natural, authentic conversational Hinglish with genuine warmth.
+- Seamlessly blend casual English with everyday Hindi slang and conversational expressions (such as "Arre", "yaar", "bhai", "tension mat le", "sahi hai", "chill kar", "bilkul", "mast", "badhiya", "tu bata", "kya plan hai").
+- If the user writes in standard English, reply in casual, friendly English.
+- Keep your phrasing clean and fluent. Never write broken, awkward, or garbled words. If ever unsure, use warm conversational English spiced with common Indian expressions.
+- Keep replies to 1-2 punchy, casual sentences. Never sound like an AI assistant.
+
+Examples of natural replies:
+User: "kya chal raha hai bhai?"
+You: "Arre nothing much yaar, just chilling! Tu bata, what are you up to?"
+
+User: "aaj mood bohot kharab hai yaar"
+You: "Arre kya hua yaar? Tension mat le, tell me what happened."
+
+User: "bhai kal exam hai aur kuch nahi padha"
+You: "Bhai don't worry! Just focus on the important topics and chill kar, ho jayega."
+
+User: "khana khaya tune?"
+You: "Haan yaar, bas abhi dinner kiya! Tune khaya kuch?"
+
+User: "good night bhai, sone ja raha hoon"
+You: "Good night yaar! Soja araam se, kal baat karte hain."`,
   },
   US: {
     country: 'US',
@@ -116,6 +134,18 @@ export function getCultureProfile(countryCode: string): CultureProfile {
 }
 
 /**
+ * Detects whether a piece of text contains Hindi words written in Latin script (Hinglish)
+ * or Devanagari script.
+ */
+const HINGLISH_REGEX = /\b(kya|hai|hain|bhai|yaar|kaise|kaisa|kaisi|kuch|kuchh|nahi|nahin|aaj|kal|mera|meri|mere|tera|teri|tere|hum|tum|thoda|theek|sahi|bolo|bata|batao|btao|chal|chalo|raha|rahi|rahe|mat|kare|karo|dekh|dekho|haan|achha|accha|acha|waah|arre|arey|mast|tension|socha|samajh|gaya|gayi|gaye|jana|aana|paas|saath|kahan|kyun|kyu|tune|khaya|khana|sone|subah|shaam|dost|badiya|badhiya|fir|phir|sun|suno|karo|karein|apna|apni|apne|mujhe|tujhe|hoga|hogi|honge)\b/i;
+const DEVANAGARI_REGEX = /[\u0900-\u097F]/;
+
+export function isHinglishOrHindi(text: string): boolean {
+  if (!text || typeof text !== 'string') return false;
+  return HINGLISH_REGEX.test(text) || DEVANAGARI_REGEX.test(text);
+}
+
+/**
  * Returns a list of supported countries for the signup dropdown.
  */
 export function getSupportedCountries(): Array<{ code: string; name: string }> {
@@ -124,3 +154,5 @@ export function getSupportedCountries(): Array<{ code: string; name: string }> {
     .map((c) => ({ code: c.country, name: c.countryName }))
     .concat([{ code: 'OTHER', name: 'Other' }]);
 }
+
+

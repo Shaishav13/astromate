@@ -68,7 +68,7 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
     // Build dynamic system prompt with OKF Memory Context
     const personality = user.personalitySeed ? JSON.parse(user.personalitySeed) : null;
     const okfContext = await getActiveOkfPromptContext(userId);
-    const systemPrompt = buildSystemPrompt(mate, user, personality, memories, okfContext);
+    const systemPrompt = buildSystemPrompt(mate, user, personality, memories, okfContext, message);
 
     // Generate AI response
     console.log(`[Chat] Generating response for ${user.name} (${mate.relationshipLevel})`);
