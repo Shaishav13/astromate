@@ -93,9 +93,14 @@ export async function generateResponse(
 
     const data = (await response.json()) as OllamaChatResponse;
     return data.message.content.trim();
-  } catch (error) {
-    if (error instanceof Error && error.message.includes('ECONNREFUSED')) {
-      throw new Error('Ollama is not running. Please start it with: ollama serve');
+  } catch (error: any) {
+    if (
+      error?.code === 'ECONNREFUSED' ||
+      error?.errno === 'ECONNREFUSED' ||
+      error?.message?.includes('ECONNREFUSED') ||
+      error?.message?.includes('fetch failed')
+    ) {
+      throw new Error('Ollama is not running on port 11434. Please start it with: ollama serve');
     }
     throw error;
   }

@@ -164,11 +164,15 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
     };
 
     return res.status(200).json(response);
-  } catch (error) {
+  } catch (error: any) {
     console.error('[Chat] Error:', error);
-    if (error instanceof Error && error.message.includes('Ollama')) {
+    if (
+      error?.message?.includes('Ollama') ||
+      error?.code === 'ECONNREFUSED' ||
+      error?.errno === 'ECONNREFUSED'
+    ) {
       return res.status(503).json({
-        error: error.message,
+        error: error.message || 'Ollama is offline. Start it with: ollama serve',
         hint: 'Make sure Ollama is running: ollama serve',
       });
     }
