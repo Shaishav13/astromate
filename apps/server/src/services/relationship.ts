@@ -106,6 +106,7 @@ CORE INSTRUCTIONS:
 - NEVER bring up astrology, zodiac signs, rashis, nakshatras, horoscopes, or planets UNLESS ${userName} specifically asks you about astrology.
 - NEVER invent nonsense words or speak broken, garbled grammar.`;
 
+
   // Culture layer
   const cultureLayer = `${cultureProfile.systemPromptAddition}`;
 

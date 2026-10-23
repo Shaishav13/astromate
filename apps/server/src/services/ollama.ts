@@ -25,6 +25,33 @@ function getModel() {
   return model.replace(/^"|"$/g, ''); // strip any surrounding quotes
 }
 
+/**
+ * Resolves the model to use. If the configured model is installed in Ollama, returns it.
+ * If not installed, falls back to an available conversational model in Ollama.
+ */
+export async function resolveModel(): Promise<string> {
+  const configured = getModel();
+  try {
+    const res = await fetch(`${getBaseUrl()}/api/tags`, { method: 'GET' });
+    if (!res.ok) return configured;
+    const data = (await res.json()) as { models?: Array<{ name: string }> };
+    const installed = data.models?.map((m) => m.name) ?? [];
+    if (installed.length === 0) return configured;
+
+    const match = installed.find(
+      (m) => m === configured || m.startsWith(configured + ':') || configured.startsWith(m)
+    );
+    if (match) return match;
+
+    console.warn(`[Ollama] Configured model "${configured}" not found in installed models. Falling back to an available model.`);
+    const fallback = installed.find((m) => !m.includes('embed')) ?? installed[0];
+    console.log(`[Ollama] Using fallback model: "${fallback}"`);
+    return fallback;
+  } catch {
+    return configured;
+  }
+}
+
 interface OllamaMessage {
   role: 'system' | 'user' | 'assistant';
   content: string;
@@ -57,7 +84,7 @@ export async function generateResponse(
   systemPrompt: string,
   conversationHistory: Array<{ role: 'USER' | 'ASSISTANT'; content: string }>
 ): Promise<string> {
-  const model = getModel();
+  const model = await resolveModel();
   const baseUrl = getBaseUrl();
 
   console.log(`[Ollama] Using model: "${model}" at ${baseUrl}`);
@@ -112,7 +139,7 @@ export async function generateResponse(
 export async function generateMemorySummary(
   messages: ChatMessage[]
 ): Promise<string> {
-  const model = getModel();
+  const model = await resolveModel();
   const baseUrl = getBaseUrl();
 
   const conversation = messages
@@ -151,7 +178,7 @@ export async function generateProactiveMessage(
   userName: string,
   daysSinceActive: number
 ): Promise<string> {
-  const model = getModel();
+  const model = await resolveModel();
   const baseUrl = getBaseUrl();
 
   const proactiveInstruction = `${systemPrompt}\n\n${userName} hasn't talked to you in ${daysSinceActive} day(s). Send them a short, casual message to check in. Stay in character. Don't be needy. Be yourself.`;
