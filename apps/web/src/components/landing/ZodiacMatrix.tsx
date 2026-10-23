@@ -248,11 +248,10 @@ export default function ZodiacMatrix() {
             <button
               key={sign}
               onClick={() => setActiveSign(sign)}
-              className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-200 group ${
-                isSelected
+              className={`flex flex-col items-center justify-center p-3 rounded-2xl border transition-all duration-200 group ${isSelected
                   ? 'bg-slate-900 border-indigo-500/80 shadow-lg shadow-indigo-950/50 text-white'
                   : 'bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 hover:bg-slate-900/50'
-              }`}
+                }`}
             >
               <div className="mb-1.5 transition-transform duration-200 group-hover:scale-110">
                 <ZodiacSigil
@@ -286,7 +285,7 @@ export default function ZodiacMatrix() {
               <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-3xl bg-slate-950 border border-slate-800 flex items-center justify-center p-4 shadow-inner mb-6 overflow-hidden group">
                 {/* Background cosmic grid */}
                 <div className="absolute inset-0 bg-[radial-gradient(#1e293b_1px,transparent_1px)] [background-size:16px_16px] opacity-40" />
-                
+
                 {/* Astronomical Constellation Graphic */}
                 <div className="relative z-10 w-full h-full flex items-center justify-center">
                   <ConstellationComponent size={140} className="transition-transform duration-500 group-hover:scale-105" />
