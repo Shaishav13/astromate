@@ -106,9 +106,9 @@ export async function generateResponse(
         messages,
         stream: false,
         options: {
-          temperature: 0.55,
+          temperature: 0.72,
           top_p: 0.9,
-          num_predict: 80,
+          num_predict: 65,
         },
       }),
     });

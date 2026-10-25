@@ -10,6 +10,7 @@ import {
 } from '../services/relationship';
 import { generateResponse, generateMemorySummary } from '../services/ollama';
 import { getActiveOkfPromptContext, extractOkfMemoriesFromConversation } from '../services/okf';
+import { isHinglishOrHindi } from '../services/culture';
 import { chatRateLimit } from '../middleware/rateLimit';
 
 const router = Router();
@@ -73,10 +74,8 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
     // Generate AI response
     console.log(`[Chat] Generating response for ${user.name} (${mate.relationshipLevel})`);
     const rawAiResponse = await generateResponse(systemPrompt, conversationHistory);
-    const aiResponseText = rawAiResponse
-      .replace(new RegExp(`^(?:${mate.name}|Assistant|AI):\\s*`, 'i'), '')
-      .replace(/^["']|["']$/g, '')
-      .trim();
+    const isHinglish = isHinglishOrHindi(message) || (user.country ?? 'IN') === 'IN';
+    const aiResponseText = sanitizeAiResponse(rawAiResponse, mate.name, isHinglish);
 
     // Save AI response
     const aiMessage = await prisma.message.create({
@@ -234,5 +233,38 @@ router.delete('/:userId', async (req: Request, res: Response) => {
     return res.status(500).json({ error: 'Failed to clear messages' });
   }
 });
+
+function sanitizeAiResponse(raw: string, mateName: string, isHinglish: boolean): string {
+  let cleaned = raw
+    .replace(new RegExp(`^(?:${mateName}|Assistant|AI):\\s*`, 'i'), '')
+    .replace(/^["']|["']$/g, '')
+    .trim();
+
+  // Strip robotic confirmations / assistant preambles at the start
+  cleaned = cleaned.replace(/^(?:Understood!|Sure thing!|Certainly!|Of course!)\s*(?:I'll try my best[^\.\n]*[\.\n]+)?/i, '').trim();
+
+  // Guard against meta-AI / architecture leaks
+  const leakPatterns = [
+    /\bI(?:'m| am) an AI\b/i,
+    /\bmy architecture\b/i,
+    /\bdesign of my architecture\b/i,
+    /\bas an AI architect\b/i,
+    /\bprogrammed to understand context\b/i,
+    /\bmimic human-like\b/i,
+    /\bfeatures that mimic\b/i,
+    /\bHow can I assist you\b/i,
+    /\blanguage model trained\b/i,
+    /\byour bond point level right now stands\b/i,
+  ];
+
+  if (leakPatterns.some((pattern) => pattern.test(cleaned))) {
+    if (isHinglish) {
+      return 'Arre architecture kya hota hai bhai haha! Main koi software ya building thodi hu, tera dost hu. Tu bata kya scene hai?';
+    }
+    return "Architecture? Haha I'm not a building or a computer program, just your friend! What's on your mind?";
+  }
+
+  return cleaned || (isHinglish ? 'Haan yaar, tu bata kya chal raha hai?' : "Hey, what's on your mind?");
+}
 
 export default router;
