@@ -54,10 +54,18 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
       orderBy: { createdAt: 'desc' },
       take: 20,
     });
-    const conversationHistory = recentMessages.reverse().map((m) => ({
-      role: m.role as 'USER' | 'ASSISTANT',
-      content: m.content,
-    }));
+    const conversationHistory = recentMessages
+      .reverse()
+      .filter((m) => {
+        if (m.role === 'ASSISTANT') {
+          return !/AI architect|bond point|Understood!\s*I'll try my best|programmed to understand/i.test(m.content);
+        }
+        return true;
+      })
+      .map((m) => ({
+        role: m.role as 'USER' | 'ASSISTANT',
+        content: m.content,
+      }));
 
     // Fetch memory snapshots for long-term context
     const memories = await prisma.memorySnapshot.findMany({
@@ -74,8 +82,7 @@ router.post('/', chatRateLimit, async (req: Request, res: Response) => {
     // Generate AI response
     console.log(`[Chat] Generating response for ${user.name} (${mate.relationshipLevel})`);
     const rawAiResponse = await generateResponse(systemPrompt, conversationHistory);
-    const isHinglish = isHinglishOrHindi(message) || (user.country ?? 'IN') === 'IN';
-    const aiResponseText = sanitizeAiResponse(rawAiResponse, mate.name, isHinglish);
+    const aiResponseText = sanitizeAiResponse(rawAiResponse, mate.name);
 
     // Save AI response
     const aiMessage = await prisma.message.create({
@@ -234,37 +241,16 @@ router.delete('/:userId', async (req: Request, res: Response) => {
   }
 });
 
-function sanitizeAiResponse(raw: string, mateName: string, isHinglish: boolean): string {
+function sanitizeAiResponse(raw: string, mateName: string): string {
   let cleaned = raw
     .replace(new RegExp(`^(?:${mateName}|Assistant|AI):\\s*`, 'i'), '')
     .replace(/^["']|["']$/g, '')
     .trim();
 
   // Strip robotic confirmations / assistant preambles at the start
-  cleaned = cleaned.replace(/^(?:Understood!|Sure thing!|Certainly!|Of course!)\s*(?:I'll try my best[^\.\n]*[\.\n]+)?/i, '').trim();
+  cleaned = cleaned.replace(/^(?:Understood!|Certainly!|Of course!)\s*(?:I'll try my best[^\.\n]*[\.\n]+)?/i, '').trim();
 
-  // Guard against meta-AI / architecture leaks
-  const leakPatterns = [
-    /\bI(?:'m| am) an AI\b/i,
-    /\bmy architecture\b/i,
-    /\bdesign of my architecture\b/i,
-    /\bas an AI architect\b/i,
-    /\bprogrammed to understand context\b/i,
-    /\bmimic human-like\b/i,
-    /\bfeatures that mimic\b/i,
-    /\bHow can I assist you\b/i,
-    /\blanguage model trained\b/i,
-    /\byour bond point level right now stands\b/i,
-  ];
-
-  if (leakPatterns.some((pattern) => pattern.test(cleaned))) {
-    if (isHinglish) {
-      return 'Arre architecture kya hota hai bhai haha! Main koi software ya building thodi hu, tera dost hu. Tu bata kya scene hai?';
-    }
-    return "Architecture? Haha I'm not a building or a computer program, just your friend! What's on your mind?";
-  }
-
-  return cleaned || (isHinglish ? 'Haan yaar, tu bata kya chal raha hai?' : "Hey, what's on your mind?");
+  return cleaned;
 }
 
 export default router;
