@@ -253,48 +253,112 @@ export function getRelationshipColor(level: RelationshipLevel | string): string 
   return styles[level] ?? styles.STRANGER;
 }
 
-/** Wallpaper options with authentic cosmic depth */
-export const WALLPAPERS = [
+export interface WallpaperTheme {
+  id: string;
+  name: string;
+  tagline: string;
+  background: string;
+  preview: string;
+  userBubble: string;
+  accentColor: string;
+  accentBorder: string;
+  headerBg: string;
+  inputBg: string;
+  ambientGlow: string;
+  tone: 'dark' | 'light';
+  style?: string;
+}
+
+/** Wallpaper options with authentic cosmic depth and distinct visual identities */
+export const WALLPAPERS: WallpaperTheme[] = [
   {
     id: 'default',
     name: 'Cosmic Void',
-    style: 'bg-[#070913] bg-[radial-gradient(ellipse_80%_80%_at_50%_-20%,rgba(120,119,198,0.15),rgba(255,255,255,0))]',
-    preview: 'linear-gradient(135deg, #070913 0%, #12172f 50%, #070913 100%)',
+    tagline: 'Deep obsidian void with celestial indigo-violet glow',
+    background: 'radial-gradient(ellipse 90% 80% at 50% -15%, rgba(99, 102, 241, 0.22) 0%, rgba(30, 27, 75, 0.5) 45%, #050711 100%)',
+    preview: 'linear-gradient(135deg, #070914 0%, #201a4e 50%, #050711 100%)',
+    userBubble: 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)',
+    accentColor: '#6366f1',
+    accentBorder: 'border-indigo-500/50',
+    headerBg: 'rgba(7, 9, 22, 0.88)',
+    inputBg: 'rgba(7, 9, 22, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.15) 0%, transparent 60%)',
     tone: 'dark',
+    style: 'bg-[#050711]',
   },
   {
     id: 'andromeda',
     name: 'Andromeda Nebula',
-    style: 'bg-[#090b1a] bg-[radial-gradient(ellipse_80%_80%_at_50%_-10%,rgba(147,51,234,0.3),rgba(6,182,212,0.1))]',
-    preview: 'linear-gradient(135deg, #1b0e38 0%, #3b0764 45%, #082f49 100%)',
+    tagline: 'Galactic deep violet clouds with radiant electric cyan dust',
+    background: 'radial-gradient(circle at 85% 15%, rgba(168, 85, 247, 0.38) 0%, transparent 48%), radial-gradient(circle at 15% 85%, rgba(6, 182, 212, 0.3) 0%, transparent 52%), radial-gradient(ellipse at 50% 50%, rgba(88, 28, 135, 0.35) 0%, transparent 65%), #070412',
+    preview: 'linear-gradient(135deg, #2e0854 0%, #7e22ce 45%, #0e7490 100%)',
+    userBubble: 'linear-gradient(135deg, #9333ea 0%, #0891b2 100%)',
+    accentColor: '#a855f7',
+    accentBorder: 'border-purple-500/50',
+    headerBg: 'rgba(11, 5, 22, 0.88)',
+    inputBg: 'rgba(11, 5, 22, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 80% 20%, rgba(168, 85, 247, 0.22) 0%, transparent 50%), radial-gradient(circle at 20% 80%, rgba(6, 182, 212, 0.18) 0%, transparent 50%)',
     tone: 'dark',
+    style: 'bg-[#070412]',
   },
   {
     id: 'celestial-aurora',
     name: 'Bioluminescent Aurora',
-    style: 'bg-[#05111b] bg-[radial-gradient(ellipse_70%_70%_at_50%_0%,rgba(20,184,166,0.25),rgba(2,6,23,0.8))]',
-    preview: 'linear-gradient(135deg, #042f2e 0%, #0f766e 40%, #022c22 100%)',
+    tagline: 'Ethereal northern borealis over dark jade & luminous emerald',
+    background: 'radial-gradient(ellipse 90% 75% at 50% -10%, rgba(20, 184, 166, 0.38) 0%, rgba(16, 185, 129, 0.22) 35%, rgba(2, 44, 34, 0.55) 65%, #01140f 100%)',
+    preview: 'linear-gradient(135deg, #022c22 0%, #0d9488 50%, #064e3b 100%)',
+    userBubble: 'linear-gradient(135deg, #0d9488 0%, #059669 100%)',
+    accentColor: '#14b8a6',
+    accentBorder: 'border-teal-500/50',
+    headerBg: 'rgba(2, 20, 15, 0.88)',
+    inputBg: 'rgba(2, 20, 15, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 50% 0%, rgba(20, 184, 166, 0.22) 0%, transparent 60%)',
     tone: 'dark',
+    style: 'bg-[#01140f]',
   },
   {
     id: 'solar-corona',
     name: 'Solar Corona',
-    style: 'bg-[#150a04] bg-[radial-gradient(ellipse_70%_70%_at_50%_0%,rgba(245,158,11,0.25),rgba(20,8,2,0.85))]',
-    preview: 'linear-gradient(135deg, #451a03 0%, #78350f 45%, #180902 100%)',
+    tagline: 'Warm molten gold & amber flares with volcanic bronze depth',
+    background: 'radial-gradient(ellipse 85% 75% at 50% -10%, rgba(245, 158, 11, 0.38) 0%, rgba(217, 119, 6, 0.25) 40%, rgba(69, 26, 3, 0.55) 70%, #140702 100%)',
+    preview: 'linear-gradient(135deg, #451a03 0%, #d97706 50%, #78350f 100%)',
+    userBubble: 'linear-gradient(135deg, #d97706 0%, #b45309 100%)',
+    accentColor: '#f59e0b',
+    accentBorder: 'border-amber-500/50',
+    headerBg: 'rgba(22, 10, 3, 0.88)',
+    inputBg: 'rgba(22, 10, 3, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 50% 0%, rgba(245, 158, 11, 0.22) 0%, transparent 60%)',
     tone: 'dark',
+    style: 'bg-[#140702]',
   },
   {
     id: 'starlight-vault',
     name: 'Starlight Vault',
-    style: 'bg-[#060812] bg-[radial-gradient(circle_at_center,rgba(56,189,248,0.12),transparent_70%)]',
-    preview: 'linear-gradient(135deg, #0c1527 0%, #1e293b 50%, #090e1c 100%)',
+    tagline: 'Crystalline sapphire ocean with icy azure starlight radiance',
+    background: 'radial-gradient(circle at 50% 20%, rgba(56, 189, 248, 0.35) 0%, rgba(30, 64, 175, 0.3) 45%, rgba(15, 23, 42, 0.75) 75%, #020817 100%)',
+    preview: 'linear-gradient(135deg, #082f49 0%, #0284c7 50%, #1e3a8a 100%)',
+    userBubble: 'linear-gradient(135deg, #0284c7 0%, #2563eb 100%)',
+    accentColor: '#38bdf8',
+    accentBorder: 'border-sky-500/50',
+    headerBg: 'rgba(3, 11, 26, 0.88)',
+    inputBg: 'rgba(3, 11, 26, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 50% 15%, rgba(56, 189, 248, 0.2) 0%, transparent 65%)',
     tone: 'dark',
+    style: 'bg-[#020817]',
   },
   {
     id: 'astral-amethyst',
     name: 'Astral Amethyst',
-    style: 'bg-[#110820] bg-[radial-gradient(ellipse_80%_80%_at_50%_-10%,rgba(217,70,239,0.2),rgba(15,3,25,0.9))]',
-    preview: 'linear-gradient(135deg, #3b0764 0%, #581c87 50%, #1e1b4b 100%)',
+    tagline: 'Royal velvet violet with vivid magenta cosmic dust pulses',
+    background: 'radial-gradient(ellipse 95% 85% at 50% 10%, rgba(217, 70, 239, 0.35) 0%, rgba(147, 51, 234, 0.28) 45%, rgba(46, 16, 101, 0.6) 75%, #0e0216 100%)',
+    preview: 'linear-gradient(135deg, #4a044e 0%, #c026d3 50%, #581c87 100%)',
+    userBubble: 'linear-gradient(135deg, #c026d3 0%, #7c3aed 100%)',
+    accentColor: '#d946ef',
+    accentBorder: 'border-fuchsia-500/50',
+    headerBg: 'rgba(16, 3, 24, 0.88)',
+    inputBg: 'rgba(16, 3, 24, 0.92)',
+    ambientGlow: 'radial-gradient(circle at 40% 15%, rgba(217, 70, 239, 0.22) 0%, transparent 55%), radial-gradient(circle at 70% 75%, rgba(147, 51, 234, 0.2) 0%, transparent 55%)',
     tone: 'dark',
+    style: 'bg-[#0e0216]',
   },
 ];

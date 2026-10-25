@@ -10,8 +10,11 @@ interface MateHeaderProps {
   rashi?: string;
   nakshatra?: string;
   isSidebarCollapsed?: boolean;
+  currentThemeName?: string;
+  themeAccentColor?: string;
   onToggleDesktopSidebar?: () => void;
   onToggleSidebar?: () => void;
+  onOpenWallpaperPicker?: () => void;
   onClearChat?: () => void;
   onLogout: () => void;
 }
@@ -19,8 +22,11 @@ interface MateHeaderProps {
 export default function MateHeader({
   mate,
   isSidebarCollapsed,
+  currentThemeName,
+  themeAccentColor,
   onToggleDesktopSidebar,
   onToggleSidebar,
+  onOpenWallpaperPicker,
   onClearChat,
 }: MateHeaderProps) {
   const zodiacInfo = ZODIAC_METADATA[mate.zodiacSign] ?? ZODIAC_METADATA.scorpio;
@@ -93,6 +99,25 @@ export default function MateHeader({
 
       {/* Right: Actions */}
       <div className="flex items-center gap-2 flex-shrink-0">
+        {/* Atmosphere / Theme Switcher */}
+        {onOpenWallpaperPicker && (
+          <button
+            type="button"
+            onClick={onOpenWallpaperPicker}
+            className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-slate-300 hover:text-white bg-slate-800/60 hover:bg-slate-800 border border-slate-700/60 text-xs font-medium transition-all group shadow-sm"
+            title="Change Chat Atmosphere Theme"
+          >
+            <span
+              className="w-2.5 h-2.5 rounded-full flex-shrink-0 transition-transform group-hover:scale-125 shadow-sm"
+              style={{ backgroundColor: themeAccentColor ?? '#818cf8' }}
+            />
+            <span className="hidden sm:inline text-[11px] text-slate-300 group-hover:text-white">
+              {currentThemeName ?? 'Theme'}
+            </span>
+            <span className="sm:hidden text-[11px]">Theme</span>
+          </button>
+        )}
+
         {/* Clear chat history */}
         {onClearChat && (
           <button

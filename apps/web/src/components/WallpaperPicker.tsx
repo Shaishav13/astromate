@@ -36,18 +36,24 @@ export default function WallpaperPicker({
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.98 }}
             transition={{ duration: 0.25, ease: 'easeOut' }}
-            className="fixed bottom-0 left-0 right-0 max-w-lg mx-auto z-50 bg-cosmic-900 border-t border-purple-500/20 rounded-t-3xl p-6 shadow-2xl text-slate-100"
+            className="fixed bottom-0 left-0 right-0 max-w-xl mx-auto z-50 bg-slate-950/95 backdrop-blur-xl border-t border-slate-800 rounded-t-3xl p-5 sm:p-6 shadow-2xl text-slate-100 max-h-[85vh] overflow-y-auto"
           >
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <span className="text-purple-400">✧</span>
-                <h3 className="font-cinzel text-base font-bold tracking-wide text-white">
-                  Cosmic Atmospheres
-                </h3>
+            <div className="flex items-center justify-between mb-4">
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-indigo-400">✧</span>
+                  <h3 className="font-semibold text-base tracking-wide text-white">
+                    Cosmic Atmospheres
+                  </h3>
+                </div>
+                <p className="text-[11px] text-slate-400 mt-0.5">
+                  Choose a vibrant ambient theme for your companion conversations
+                </p>
               </div>
               <button
                 onClick={onClose}
-                className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-white/10 transition-colors"
+                className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                title="Close"
               >
                 <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -66,31 +72,50 @@ export default function WallpaperPicker({
                       onClose();
                     }}
                     className={clsx(
-                      'group relative rounded-2xl overflow-hidden h-24 p-0.5 transition-all text-left',
+                      'group relative rounded-2xl overflow-hidden h-28 p-0.5 transition-all text-left flex flex-col justify-between shadow-sm',
                       isSelected
-                        ? 'ring-2 ring-purple-400 ring-offset-2 ring-offset-cosmic-950 shadow-[0_0_15px_rgba(168,85,247,0.4)]'
-                        : 'hover:scale-[1.02] border border-white/10'
+                        ? 'shadow-lg scale-[1.02]'
+                        : 'hover:scale-[1.02] border border-slate-800/80 hover:border-slate-700'
                     )}
+                    style={
+                      isSelected
+                        ? {
+                            boxShadow: `0 0 0 2px ${wallpaper.accentColor}, 0 0 16px ${wallpaper.accentColor}40`,
+                          }
+                        : undefined
+                    }
                   >
                     <div
-                      className="w-full h-full rounded-[14px] p-2 flex flex-col justify-end relative overflow-hidden"
+                      className="w-full h-full rounded-[14px] p-2.5 flex flex-col justify-between relative overflow-hidden"
                       style={{ background: wallpaper.preview }}
                     >
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
-                      <span className="relative z-10 text-[11px] font-medium text-white tracking-wide">
-                        {wallpaper.name}
-                      </span>
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 w-5 h-5 bg-purple-500 rounded-full flex items-center justify-center shadow-md">
-                          <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 20 20">
-                            <path
-                              fillRule="evenodd"
-                              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </div>
-                      )}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
+
+                      {/* Top row: color dot & selected indicator */}
+                      <div className="relative z-10 flex items-center justify-between">
+                        <span
+                          className="w-2.5 h-2.5 rounded-full shadow-sm"
+                          style={{ backgroundColor: wallpaper.accentColor }}
+                        />
+                        {isSelected && (
+                          <div
+                            className="w-5 h-5 rounded-full flex items-center justify-center text-white shadow-md text-[10px] font-bold"
+                            style={{ backgroundColor: wallpaper.accentColor }}
+                          >
+                            ✓
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Bottom info */}
+                      <div className="relative z-10">
+                        <span className="text-xs font-semibold text-white tracking-wide block truncate">
+                          {wallpaper.name}
+                        </span>
+                        <span className="text-[10px] text-slate-300 line-clamp-1 opacity-90 block mt-0.5">
+                          {wallpaper.tagline}
+                        </span>
+                      </div>
                     </div>
                   </button>
                 );

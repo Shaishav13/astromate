@@ -431,7 +431,16 @@ export default function ChatPage() {
       </AnimatePresence>
 
       {/* 3. MAIN CHAT AREA */}
-      <main className="flex-1 flex flex-col h-full min-h-0 min-w-0 relative overflow-hidden bg-slate-950">
+      <main
+        className="flex-1 flex flex-col h-full min-h-0 min-w-0 relative overflow-hidden transition-all duration-500"
+        style={{ background: currentWallpaper.background }}
+      >
+        {/* Dynamic theme ambient glow layer */}
+        <div
+          className="absolute inset-0 pointer-events-none z-0 transition-all duration-700"
+          style={{ background: currentWallpaper.ambientGlow }}
+        />
+
         {/* Header */}
         {mate && (
           <MateHeader
@@ -439,6 +448,9 @@ export default function ChatPage() {
             rashi={mateExtra.rashi}
             nakshatra={mateExtra.nakshatra}
             isSidebarCollapsed={isSidebarCollapsed}
+            currentThemeName={currentWallpaper.name}
+            themeAccentColor={currentWallpaper.accentColor}
+            onOpenWallpaperPicker={() => setShowWallpaper(true)}
             onToggleDesktopSidebar={() => setIsSidebarCollapsed((prev) => !prev)}
             onToggleSidebar={() => setMobileSidebarOpen(true)}
             onClearChat={handleClearChat}
@@ -463,10 +475,7 @@ export default function ChatPage() {
 
         {/* Chat Feed Scroll Area (Optimized for Mobile Touch & Elastic Scrolling) */}
         <div
-          className={clsx(
-            'flex-1 min-h-0 overflow-y-auto overflow-x-hidden chat-scroll relative overscroll-contain',
-            currentWallpaper.style
-          )}
+          className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden chat-scroll relative z-10 overscroll-contain"
           style={{
             WebkitOverflowScrolling: 'touch',
             touchAction: 'pan-y',
@@ -480,7 +489,7 @@ export default function ChatPage() {
             {/* Empty State */}
             {messages.length === 0 && mateZodiac && (
               <div className="my-auto flex-1 flex flex-col items-center justify-center text-center p-6">
-                <div className="w-12 h-12 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center mb-3 text-slate-200 font-semibold text-base shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-slate-800/90 border border-slate-700/80 flex items-center justify-center mb-3 text-slate-200 font-semibold text-base shadow-sm">
                   {mate?.name.charAt(0).toUpperCase()}
                 </div>
 
@@ -497,7 +506,7 @@ export default function ChatPage() {
                     <button
                       key={i}
                       onClick={() => handleSend(prompt)}
-                      className="px-3 py-2 rounded-lg bg-slate-900/90 hover:bg-slate-800/90 border border-slate-800 hover:border-slate-700 text-left text-xs text-slate-300 transition-colors"
+                      className="px-3 py-2 rounded-lg bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-slate-700 text-left text-xs text-slate-300 transition-colors"
                     >
                       <span className="truncate block">{prompt}</span>
                     </button>
@@ -516,6 +525,7 @@ export default function ChatPage() {
                     isUser={msg.role === 'USER'}
                     mateName={mate?.name}
                     mateSymbol={mateZodiac?.symbol}
+                    userBubbleStyle={currentWallpaper.userBubble}
                   />
                 ))}
 
@@ -542,14 +552,17 @@ export default function ChatPage() {
         )}
 
         {/* Suggested Prompts (Clean horizontal pills) */}
-        <div className="w-full bg-slate-950/90 border-t border-slate-800/60 z-20 flex-shrink-0">
+        <div
+          className="w-full border-t border-slate-800/60 z-20 flex-shrink-0 backdrop-blur-md transition-colors duration-500"
+          style={{ background: currentWallpaper.inputBg }}
+        >
           <div className="max-w-2xl w-full mx-auto px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {CONVERSATION_PROMPTS.map((promptText, i) => (
               <button
                 key={i}
                 onClick={() => handleSend(promptText)}
                 disabled={isTyping}
-                className="whitespace-nowrap px-3 py-1 rounded-full bg-slate-900 hover:bg-slate-800 border border-slate-800 hover:border-slate-700 text-[11px] text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-40"
+                className="whitespace-nowrap px-3 py-1 rounded-full bg-slate-900/80 hover:bg-slate-800 border border-slate-800/80 hover:border-slate-700 text-[11px] text-slate-400 hover:text-slate-200 transition-colors disabled:opacity-40"
               >
                 {promptText}
               </button>
@@ -558,7 +571,10 @@ export default function ChatPage() {
         </div>
 
         {/* Main Input Bar */}
-        <div className="w-full bg-slate-950 border-t border-slate-800/80 z-20 flex-shrink-0">
+        <div
+          className="w-full border-t border-slate-800/80 z-20 flex-shrink-0 backdrop-blur-md transition-colors duration-500"
+          style={{ background: currentWallpaper.inputBg }}
+        >
           <div className="max-w-2xl w-full mx-auto p-3 sm:p-4">
             <div className="relative flex items-center">
               <textarea
@@ -569,13 +585,17 @@ export default function ChatPage() {
                 placeholder={`Message ${mate?.name ?? 'your companion'}...`}
                 rows={1}
                 disabled={isTyping}
-                className="w-full bg-slate-900/90 text-slate-100 placeholder-slate-500 rounded-xl pl-4 pr-12 py-3 text-xs sm:text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500/50 border border-slate-800/80 transition-all disabled:opacity-50"
+                className="w-full bg-slate-900/80 text-slate-100 placeholder-slate-500 rounded-xl pl-4 pr-12 py-3 text-xs sm:text-sm resize-none focus:outline-none focus:ring-1 focus:ring-indigo-500/50 border border-slate-800/80 transition-all disabled:opacity-50"
                 style={{ maxHeight: '120px' }}
               />
               <button
                 onClick={() => handleSend()}
                 disabled={!input.trim() || isTyping}
-                className="absolute right-2 p-2 rounded-lg bg-indigo-600 hover:bg-indigo-500 text-white disabled:opacity-30 disabled:hover:bg-indigo-600 transition-all flex items-center justify-center shadow-sm"
+                className="absolute right-2 p-2 rounded-lg text-white disabled:opacity-30 transition-all flex items-center justify-center shadow-sm"
+                style={{
+                  backgroundColor: currentWallpaper.accentColor,
+                  filter: input.trim() && !isTyping ? 'brightness(1)' : 'brightness(0.7)',
+                }}
                 title="Send message"
               >
                 <svg

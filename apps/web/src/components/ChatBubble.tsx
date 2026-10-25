@@ -10,12 +10,14 @@ interface ChatBubbleProps {
   isUser: boolean;
   mateName?: string;
   mateSymbol?: string;
+  userBubbleStyle?: string;
 }
 
 export default function ChatBubble({
   message,
   isUser,
   mateName,
+  userBubbleStyle,
 }: ChatBubbleProps) {
   const timeAgo = formatDistanceToNow(new Date(message.createdAt), {
     addSuffix: true,
@@ -50,11 +52,16 @@ export default function ChatBubble({
         {/* Bubble Body */}
         <div
           className={clsx(
-            'px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words transition-colors shadow-sm',
+            'px-4 py-2.5 rounded-2xl text-[14px] leading-relaxed break-words transition-all shadow-sm',
             isUser
-              ? 'bg-indigo-600 text-white rounded-tr-xs'
-              : 'bg-slate-900/90 text-slate-100 rounded-tl-xs border border-slate-800'
+              ? 'text-white rounded-tr-xs shadow-md'
+              : 'bg-slate-900/80 backdrop-blur-md text-slate-100 rounded-tl-xs border border-slate-800/80'
           )}
+          style={
+            isUser
+              ? { background: userBubbleStyle || 'linear-gradient(135deg, #4f46e5 0%, #4338ca 100%)' }
+              : undefined
+          }
         >
           {message.content}
         </div>

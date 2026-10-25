@@ -576,21 +576,35 @@ export default function SettingsPage() {
                   key={wallpaper.id}
                   onClick={() => handleSelectWallpaper(wallpaper.id)}
                   className={clsx(
-                    'group relative rounded-2xl overflow-hidden h-28 p-0.5 transition-all text-left flex flex-col justify-between',
+                    'group relative rounded-2xl overflow-hidden h-32 p-0.5 transition-all text-left flex flex-col justify-between shadow-sm',
                     isSelected
-                      ? 'ring-2 ring-indigo-400 ring-offset-2 ring-offset-slate-950 shadow-[0_0_20px_rgba(99,102,241,0.25)]'
+                      ? 'scale-[1.02] shadow-xl'
                       : 'hover:scale-[1.01] border border-slate-800/80 hover:border-slate-700'
                   )}
+                  style={
+                    isSelected
+                      ? {
+                          boxShadow: `0 0 0 2px ${wallpaper.accentColor}, 0 0 20px ${wallpaper.accentColor}35`,
+                        }
+                      : undefined
+                  }
                 >
                   <div
                     className="w-full h-full rounded-[14px] p-3 flex flex-col justify-between relative overflow-hidden"
                     style={{ background: wallpaper.preview }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/25 to-transparent" />
 
                     <div className="relative z-10 flex items-center justify-between">
+                      <span
+                        className="w-2.5 h-2.5 rounded-full shadow-sm"
+                        style={{ backgroundColor: wallpaper.accentColor }}
+                      />
                       {isSelected ? (
-                        <span className="w-5 h-5 rounded-full bg-indigo-500 text-white flex items-center justify-center text-[10px] font-bold shadow">
+                        <span
+                          className="w-5 h-5 rounded-full text-white flex items-center justify-center text-[10px] font-bold shadow-md"
+                          style={{ backgroundColor: wallpaper.accentColor }}
+                        >
                           ✓
                         </span>
                       ) : (
@@ -599,11 +613,11 @@ export default function SettingsPage() {
                     </div>
 
                     <div className="relative z-10">
-                      <span className="text-xs font-semibold text-white tracking-wide block">
+                      <span className="text-xs font-semibold text-white tracking-wide block truncate">
                         {wallpaper.name}
                       </span>
-                      <span className="text-[10px] text-slate-300">
-                        {isSelected ? 'Active Atmosphere' : 'Click to Apply'}
+                      <span className="text-[10px] text-slate-300 block line-clamp-1 opacity-85 mt-0.5">
+                        {wallpaper.tagline}
                       </span>
                     </div>
                   </div>
