@@ -29,7 +29,7 @@ export default function ChatBubble({
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.18, ease: 'easeOut' }}
       className={clsx(
-        'flex gap-2.5 max-w-[85%] sm:max-w-[75%] md:max-w-[68%] mb-2.5 group',
+        'flex gap-2.5 max-w-[88%] sm:max-w-[82%] md:max-w-[76%] lg:max-w-[72%] mb-2.5 group',
         isUser ? 'self-end flex-row-reverse' : 'self-start flex-row'
       )}
     >

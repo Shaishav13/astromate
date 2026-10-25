@@ -482,7 +482,7 @@ export default function ChatPage() {
           }}
         >
           {/* Centered Content Container */}
-          <div className="max-w-2xl w-full mx-auto px-4 sm:px-6 py-4 sm:py-6 min-h-full flex flex-col justify-between relative z-10">
+          <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-4 sm:py-6 min-h-full flex flex-col justify-between relative z-10">
             {/* Top spacer when messages are few to keep them near bottom smoothly */}
             {messages.length > 0 && <div className="flex-1 min-h-[16px]" />}
 
@@ -496,17 +496,17 @@ export default function ChatPage() {
                 <h3 className="font-semibold text-slate-100 text-base mb-1">
                   Chat with {mate?.name}
                 </h3>
-                <p className="text-xs text-slate-400 max-w-xs leading-relaxed mb-6">
+                <p className="text-xs text-slate-400 max-w-xs sm:max-w-sm leading-relaxed mb-6">
                   {mateZodiac.name} companion. Start a conversation naturally—your bond deepens over time.
                 </p>
 
                 {/* Suggestions */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full max-w-sm">
-                  {CONVERSATION_PROMPTS.slice(0, 4).map((prompt, i) => (
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 w-full max-w-sm sm:max-w-xl lg:max-w-3xl">
+                  {CONVERSATION_PROMPTS.map((prompt, i) => (
                     <button
                       key={i}
                       onClick={() => handleSend(prompt)}
-                      className="px-3 py-2 rounded-lg bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-slate-700 text-left text-xs text-slate-300 transition-colors"
+                      className="px-3.5 py-2.5 rounded-xl bg-slate-900/80 hover:bg-slate-800/80 border border-slate-800/80 hover:border-slate-700 text-left text-xs text-slate-300 transition-colors shadow-sm"
                     >
                       <span className="truncate block">{prompt}</span>
                     </button>
@@ -556,7 +556,7 @@ export default function ChatPage() {
           className="w-full border-t border-slate-800/60 z-20 flex-shrink-0 backdrop-blur-md transition-colors duration-500"
           style={{ background: currentWallpaper.inputBg }}
         >
-          <div className="max-w-2xl w-full mx-auto px-4 py-2 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
+          <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto px-3 sm:px-6 lg:px-8 py-2.5 flex items-center gap-1.5 overflow-x-auto no-scrollbar">
             {CONVERSATION_PROMPTS.map((promptText, i) => (
               <button
                 key={i}
@@ -575,7 +575,7 @@ export default function ChatPage() {
           className="w-full border-t border-slate-800/80 z-20 flex-shrink-0 backdrop-blur-md transition-colors duration-500"
           style={{ background: currentWallpaper.inputBg }}
         >
-          <div className="max-w-2xl w-full mx-auto p-3 sm:p-4">
+          <div className="w-full max-w-4xl lg:max-w-5xl xl:max-w-6xl 2xl:max-w-7xl mx-auto p-3 sm:p-4 lg:px-8">
             <div className="relative flex items-center">
               <textarea
                 ref={inputRef}

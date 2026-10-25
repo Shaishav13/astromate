@@ -32,7 +32,7 @@ export default function MateHeader({
   const zodiacInfo = ZODIAC_METADATA[mate.zodiacSign] ?? ZODIAC_METADATA.scorpio;
 
   return (
-    <header className="flex items-center justify-between px-3 sm:px-6 py-2.5 sm:py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 relative z-20 flex-shrink-0">
+    <header className="flex items-center justify-between px-3 sm:px-6 lg:px-8 py-2.5 sm:py-3 bg-slate-900/90 backdrop-blur-md border-b border-slate-800/80 relative z-20 flex-shrink-0">
       {/* Left: Sidebar Toggle & Companion Summary */}
       <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
         {/* Mobile Drawer Toggle */}
